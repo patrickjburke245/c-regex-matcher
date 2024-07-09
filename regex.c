@@ -13,25 +13,14 @@ void print_result(int return_value) {
   }
 }
 
-int social_security_number_check(char str[]) {
+void aws_access_key_id_check(char str[]) {
   regex_t regex;
-  int return_value = regcomp(&regex,"[0-9]{3}-[0-9]{2}-[0-9]{4}", REG_EXTENDED);
-  return_value = regexec(&regex, str, 0, NULL, 0);
-
-  if (return_value == 0) {
-    print_result(return_value);
-    return 0;
-  }
-
-  return_value = regcomp(&regex,"([0-9]){9}", REG_EXTENDED);
+  int return_value = regcomp(&regex, "[ASIA|AKIA|AROA|AIDA][A-Z0-7]{16}", REG_EXTENDED);
   return_value = regexec(&regex, str, 0, NULL, 0);
   if (return_value == 0) {
     print_result(return_value);
-    return 0;
   }
-  
   print_result(return_value);
-  return 0;
 }
 
 int credit_card_number_check(char str[]) {
@@ -54,14 +43,45 @@ int credit_card_number_check(char str[]) {
   return 0;
 }
 
-void aws_access_key_id_check(char str[]) {
+int email_address_check(char str[]) {
   regex_t regex;
-  int return_value = regcomp(&regex, "[ASIA|AKIA|AROA|AIDA][A-Z0-7]{16}", REG_EXTENDED);
+  int return_value = regcomp(&regex, "[A-Za-z0-9]*@[A-Za-z0-9]*.com", REG_EXTENDED);
+  return_value = regexec(&regex, str, 0, NULL, 0);
+
+  if (return_value == 0) {
+    print_result(return_value);
+    return 0;
+  }
+
+  return_value = regcomp(&regex, "[A-Za-z0-9]*@[A-Za-z0-9]*.org", REG_EXTENDED);
   return_value = regexec(&regex, str, 0, NULL, 0);
   if (return_value == 0) {
     print_result(return_value);
+    return 0;
   }
   print_result(return_value);
+  return 0;
+}
+
+int social_security_number_check(char str[]) {
+  regex_t regex;
+  int return_value = regcomp(&regex,"[0-9]{3}-[0-9]{2}-[0-9]{4}", REG_EXTENDED);
+  return_value = regexec(&regex, str, 0, NULL, 0);
+
+  if (return_value == 0) {
+    print_result(return_value);
+    return 0;
+  }
+
+  return_value = regcomp(&regex,"([0-9]){9}", REG_EXTENDED);
+  return_value = regexec(&regex, str, 0, NULL, 0);
+  if (return_value == 0) {
+    print_result(return_value);
+    return 0;
+  }
+  
+  print_result(return_value);
+  return 0;
 }
 
 int main() {
@@ -73,11 +93,11 @@ int main() {
   char line[256];
 
   printf("How do you want to supply the input?");
-  printf("  '1' for File in same directory\n  '2' for stdin input\n");
+  printf("  '1' for 'testfile.txt' in same directory\n  '2' for stdin input\n");
   scanf("%c", &input_choice);
   printf("What sensitive data type do you want me to look for? Type:\n");
   printf("  '1' for Credit Card Numbers\n  '2' for Social Security Numbers\n");
-  printf("  '3' for AWS Access Key IDs\n");
+  printf("  '3' for AWS Access Key IDs\n  '4' for Email Addresses\n");
   scanf(" %c", &sensitive_data_choice);
   
   if (input_choice == '1') {
@@ -87,7 +107,15 @@ int main() {
       while (fgets(line, sizeof(line), file)) {
         // Print each line to the standard output.
         //printf("%s", line);
-        credit_card_number_check(line);
+        if (sensitive_data_choice == '1') {
+          credit_card_number_check(line);
+        } else if (sensitive_data_choice == '2') {
+          social_security_number_check(line);
+        } else if (sensitive_data_choice == '3') {
+          aws_access_key_id_check(line);
+        } else if (sensitive_data_choice == '4') {
+          email_address_check(line);
+        }
       }
 
       // Close the file stream once all lines have been
@@ -109,6 +137,8 @@ int main() {
         social_security_number_check(input_string);
     } else if (sensitive_data_choice == '3') {
         aws_access_key_id_check(input_string);
+    } else if (sensitive_data_choice == '4') {
+        email_address_check(input_string);
     }
   }
   
